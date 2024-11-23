@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Repository</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Raleway:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header class="hero-section">
+        <div class="content">
+            <h1 class="title">Repository: <span class="highlight">{{ repository.name }}</span></h1>
+            <p class="description">{{ repository.description }}</p>
+        </div>
+        <div class="illustration">
+            <img src="{{ url_for('static', filename='images/repository-illustration.svg') }}" alt="Illustration of a Repository">
+        </div>
+    </header>
+
+    <main>
+        <section class="project-section">
+            <div class="container">
+                {% if session.get('role') == 'student' %}
+                    <div class="form-container">
+                        <h2 class="section-title">Add a New Project</h2>
+                        <form action="{{ url_for('add_project', repo_id=repository.id) }}" method="POST" enctype="multipart/form-data" class="project-form">
+                            <label for="name">Project Name:</label>
+                            <input type="text" id="name" name="name" placeholder="Enter Project Name" required>
+
+                            <label for="description">Project Description:</label>
+                            <textarea id="description" name="description" placeholder="Enter Project Description"></textarea>
+
+                            <label for="project_file">Upload File:</label>
+                            <input type="file" id="project_file" name="project_file" required>
+
+                            <button type="submit" class="btn btn-primary">Add Project</button>
+                        </form>
+                    </div>
+                {% endif %}
+
+                <div class="projects-container">
+                    <h2 class="section-title">Projects</h2>
+                    {% if repository.projects %}
+                        <ul class="project-list">
+                            {% for project in repository.projects %}
+                                <li class="project-item">
+                                    <div class="project-details">
+                                        <h3>{{ project.name }}</h3>
+                                        <p>{{ project.description }}</p>
+                                        {% if project.score %}
+                                            <span class="score">Score: {{ project.score }}</span>
+                                        {% endif %}
+                                    </div>
+                                    {% if session.get('role') == 'teacher' %}
+                                        <form action="{{ url_for('add_score', project_id=project.id) }}" method="POST" class="score-form">
+                                            <label for="score-{{ project.id }}">Assign Score:</label>
+                                            <input type="number" id="score-{{ project.id }}" name="score" placeholder="Enter Score" required>
+                                            <button type="submit" class="btn btn-secondary">Submit Score</button>
+                                        </form>
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="no-projects">No projects available. Add a new project to get started.</p>
+                    {% endif %}
+                </div>
+
+                {% if session.get('role') == 'teacher' %}
+                    <div class="form-container">
+                        <h2 class="section-title">Assign New Project</h2>
+                        <form action="{{ url_for('assign_project', repo_id=repository.id) }}" method="POST" class="assign-form">
+                            <label for="message">Project Description:</label>
+                            <textarea id="message" name="message" placeholder="Enter Assignment Details" required></textarea>
+                            <button type="submit" class="btn btn-primary">Assign Project</button>
+                        </form>
+                    </div>
+                {% endif %}
+
+                <div class="navigation-container">
+                    <a href="{{ url_for('teacher_dashboard' if session.get('role') == 'teacher' else 'student_dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-container">
+            <p>&copy; 2024 Code Repository | <em>Turning Ideas into Solutions</em></p>
+        </div>
+    </footer>
+</body>
+</html>
